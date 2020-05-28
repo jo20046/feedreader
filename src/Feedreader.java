@@ -29,6 +29,7 @@ public class Feedreader {
             System.out.println(rssFeedURL);
             getHttpContent(rssFeedURL, false);
 //            System.out.println(rssContent);
+            Parser parser = new Parser();
         } else {
             System.out.println("Couldn't connect to " + urlString);
         }
@@ -58,7 +59,7 @@ public class Feedreader {
                     line = in.nextLine();
                     content.append(line).append('\n');
                 }
-                String filename = isHTML ? "html_output.txt" : "rss_output.txt";
+                String filename = isHTML ? "html_page.html" : "rss_feed.xml";
                 PrintWriter out = new PrintWriter(filename);
                 out.println(content.toString());
                 out.close();
