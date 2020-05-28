@@ -3,9 +3,12 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+// TODO: Kommentare & Refactoring printRssContent()
 
 public class Feedreader {
 
@@ -28,8 +31,13 @@ public class Feedreader {
             getRssURL(htmlContent);
             System.out.println(rssFeedURL);
             getHttpContent(rssFeedURL, false);
-//            System.out.println(rssContent);
             Parser parser = new Parser();
+            ArrayList<Article> articles = parser.getArticles();
+            for (Article article : articles) {
+                System.out.println("Titel: " + article.getTitle());
+                System.out.println("Link: " + article.getLink());
+                System.out.println();
+            }
         } else {
             System.out.println("Couldn't connect to " + urlString);
         }
