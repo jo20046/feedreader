@@ -5,19 +5,17 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 // TODO: Kommentare & Refactoring printRssContent()
 
 public class Feedreader {
 
     private final String urlString;
-    private String htmlContent;
-    private String rssContent;
-    private String rssFeedURL;
     private final boolean useSecure;
-    private boolean connectionOK;
+    private String htmlContent = "";
+    private String rssContent = "";
+    private String rssFeedURL = "";
+    private boolean connectionOK = false;
 
     Feedreader(String urlString, boolean useSecure) {
         this.urlString = urlString;
@@ -26,11 +24,18 @@ public class Feedreader {
     }
 
     void printRssContent() {
-        getHttpContent(urlString, true);
-        if (connectionOK) {
+
+        try {
+
+            // Mit gegebener URL verbinden, RSS-Feed suchen, mit RSS-Feed verbinden und speichern
+            getHttpContent(urlString, true);
+            if (!connectionOK) throw new IOException("Couldn't connect to " + urlString);
             getRssURL(htmlContent);
-            System.out.println(rssFeedURL);
+            if (rssFeedURL.isEmpty()) throw new IOException("No RSS Feed found for specified URL");
             getHttpContent(rssFeedURL, false);
+            if (!connectionOK) throw new IOException("Couldn't connect to RSS Feed under " + rssFeedURL);
+
+            // RSS-Feed mit Parser durchlaufen und Schlagzeilen auf Bildschirm ausgeben
             Parser parser = new Parser();
             ArrayList<Article> articles = parser.getArticles();
             for (Article article : articles) {
@@ -38,8 +43,9 @@ public class Feedreader {
                 System.out.println("Link: " + article.getLink());
                 System.out.println();
             }
-        } else {
-            System.out.println("Couldn't connect to " + urlString);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -47,17 +53,18 @@ public class Feedreader {
      * Get the HTML representation of a specified website by connecting via HTTP (or HTTPS).
      *
      * @param urlInput the URL to connect to
-     * @param isHTML true for HTML, false for RSS
+     * @param isHTML   true for HTML, false for RSS
      */
     private void getHttpContent(String urlInput, boolean isHTML) {
 
         try {
+            connectionOK = false;
             HttpURLConnection huc = buildHttpConnection(urlInput);
             StringBuilder content = new StringBuilder();
 
             if (huc.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                connectionOK = false;
                 System.out.println(huc.getResponseMessage());
+                throw new IOException();
             } else {
                 connectionOK = true;
                 System.out.println(huc.getResponseMessage());
@@ -78,7 +85,7 @@ public class Feedreader {
             else
                 rssContent = content.toString();
         } catch (IOException e) {
-            e.printStackTrace();
+            connectionOK = false;
         }
     }
 
@@ -102,12 +109,18 @@ public class Feedreader {
 
     /**
      * Find the RSS feed url in a HTML representation of a website
+     *
      * @param html the HTML content
      */
     private void getRssURL(String html) {
-        Pattern pattern = Pattern.compile("https://.*?/index\\.rss");
-        Matcher matcher = pattern.matcher(html);
-        if (matcher.find())
-            rssFeedURL = matcher.group();
+        Scanner scanner = new Scanner(html);
+        for (String line; scanner.hasNextLine(); ) {
+            line = scanner.nextLine();
+            if (line.matches(".*href=\".*rss.*")) {
+                rssFeedURL = line.substring(line.indexOf("href=")).split("\"")[1];
+                break;
+            }
+        }
+        scanner.close();
     }
 }

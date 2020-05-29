@@ -14,9 +14,12 @@ public class Main {
      * @return the URL as a String
      */
     private static String getURL() {
-//        Scanner userInput = new Scanner(System.in);
-//        System.out.println("Enter URL:");
-//        return userInput.next();
-        return "www.spiegel.de";
+        Scanner userInput = new Scanner(System.in);
+        System.out.println("Enter URL:");
+        return userInput.next();
+//        return "www.spiegel.de";
+//        return "www.bild.de";
+//        return "www.focus.de";
+//        return "www.sueddeutsche.de";
     }
 }
