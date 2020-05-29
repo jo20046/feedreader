@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-// TODO: Kommentare & Refactoring gesamte Klasse
-
 public class Parser extends DefaultHandler {
 
     private ArrayList<Article> articles;

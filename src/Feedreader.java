@@ -6,8 +6,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-// TODO: Kommentare & Refactoring printRssContent()
-
 public class Feedreader {
 
     private final String urlString;
